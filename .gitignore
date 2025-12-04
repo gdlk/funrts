@@ -1,0 +1,8 @@
+.godot/
+.mono/
+export_presets.cfg
+*.import
+*.translation
+# Optional: Ignore specific IDE files if you don't want to share them
+.idea/
+.vscode/

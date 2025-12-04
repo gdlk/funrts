@@ -1,0 +1,36 @@
+[gd_scene load_steps=2 format=3 uid="uid://MainMenuScene"]
+
+[ext_resource type="Script" path="res://scenes/ui/MainMenu.gd" id="1"]
+
+[node name="MainMenu" type="Control"]
+script = ExtResource("1")
+
+[node name="Panel" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="NewGameButton" type="Button" parent="Panel"]
+text = "Новая игра"
+position = Vector2(100, 100)
+
+[node name="LoadGameButton" type="Button" parent="Panel"]
+text = "Загрузить игру"
+position = Vector2(100, 150)
+
+[node name="SettingsButton" type="Button" parent="Panel"]
+text = "Настройки"
+position = Vector2(100, 200)
+
+[node name="QuitButton" type="Button" parent="Panel"]
+text = "Выход"
+position = Vector2(100, 250)
+
+[node name="RaceSelectionPanel" type="Panel" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="NotificationLabel" type="Label" parent="."]
+position = Vector2(0, 0)
+size = Vector2(400, 50)
+text = ""

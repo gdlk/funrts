@@ -1,0 +1,58 @@
+funrts/
+├── project.godot
+├── assets/
+│   ├── sprites/
+│   │   ├── lizards/
+│   │   ├── canids/
+│   │   └── rus/
+│   ├── audio/
+│   │   ├── music/
+│   │   └── sfx/
+│   ├── fonts/
+│   └── ui/
+├── scenes/
+│   ├── main/
+│   │   ├── Main.tscn
+│   │   └── Main.gd
+│   ├── game/
+│   │   ├── Game.tscn
+│   │   └── Game.gd
+│   ├── ui/
+│   │   ├── MainMenu.tscn
+│   │   ├── HUD.tscn
+│   │   └── BuildMenu.tscn
+│   ├── units/
+│   │   ├── BaseUnit.tscn
+│   │   ├── LizardUnit.tscn
+│   │   ├── CanidUnit.tscn
+│   │   └── RusUnit.tscn
+│   ├── buildings/
+│   │   ├── BaseBuilding.tscn
+│   │   └── [расовые постройки]
+│   └── world/
+│       ├── Tile.tscn
+│       ├── Map.tscn
+│       └── MapGenerator.gd
+├── scripts/
+│   ├── autoload/
+│   │   ├── GameManager.gd
+│   │   ├── ResourceManager.gd
+│   │   ├── EventBus.gd
+│   │   └── SaveSystem.gd
+│   ├── systems/
+│   │   ├── PathfindingSystem.gd
+│   │   ├── ProductionSystem.gd
+│   │   ├── NeedsSystem.gd
+│   │   └── CombatSystem.gd
+│   ├── data/
+│   │   ├── UnitData.gd
+│   │   ├── BuildingData.gd
+│   │   └── ResourceData.gd
+│   └── utils/
+│       ├── Constants.gd
+│       └── Helpers.gd
+└── data/
+	├── units/
+	├── buildings/
+	├── resources/
+	└── events/
