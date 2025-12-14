@@ -5,6 +5,120 @@
 
 ---
 
+
+## 0. ECS Архитектура (Новое!)
+
+### 0.1 Общая схема ECS
+
+```mermaid
+graph TB
+    subgraph "Godot Scene Tree"
+        Node[CharacterBody2D/StaticBody2D]
+        Sprite[Sprite2D]
+        Collision[CollisionShape2D]
+    end
+    
+    subgraph "Гибридный слой"
+        UnitNode[UnitNode/BuildingNode]
+        UnitNode -->|entity_id| EntityRef[Ссылка на Entity]
+    end
+    
+    subgraph "ECS World"
+        Entity[Entity ID: 42]
+        Components[Компоненты]
+        Systems[Системы]
+        
+        Entity -->|имеет| Components
+        Systems -->|обрабатывают| Components
+    end
+    
+    subgraph "Компоненты Entity 42"
+        Transform[TransformComponent<br/>position, rotation]
+        Health[HealthComponent<br/>current: 85, max: 100]
+        Needs[NeedsComponent<br/>hunger: 70, rest: 50]
+        Task[TaskComponent<br/>current: MOVING]
+    end
+    
+    Node -->|содержит| UnitNode
+    UnitNode -->|создает| Entity
+    Entity -->|содержит| Transform
+    Entity -->|содержит| Health
+    Entity -->|содержит| Needs
+    Entity -->|содержит| Task
+    
+    Systems -->|обновляет| Transform
+    Transform -->|синхронизация| Node
+```
+
+### 0.2 Поток данных в ECS
+
+```mermaid
+sequenceDiagram
+    participant User as Игрок
+    participant Node as UnitNode
+    participant ECS as ECSWorld
+    participant Sys as ECS Systems
+    participant Comp as Components
+    
+    Note over User,Comp: Каждый кадр (_process)
+    
+    User->>Node: Клик ПКМ (move_to)
+    Node->>ECS: get_component(PathComponent)
+    ECS->>Comp: Возврат PathComponent
+    Node->>Comp: set_path(new_path)
+    
+    Note over Sys: ECSWorld._process(delta)
+    
+    Sys->>ECS: query([Transform, Velocity, Path])
+    ECS->>Sys: [entity_id: 42, 43, 44...]
+    
+    loop Для каждой entity
+        Sys->>ECS: get_component(Transform)
+        Sys->>ECS: get_component(Velocity)
+        Sys->>ECS: get_component(Path)
+        Sys->>Comp: Обновление позиции
+        Comp->>Node: Синхронизация через node_ref
+    end
+    
+    Node->>Node: Обновление визуала
+```
+
+### 0.3 Сравнение: OOP vs ECS
+
+```mermaid
+graph LR
+    subgraph "OOP (Старый подход)"
+        U1[Unit 1<br/>_process]
+        U2[Unit 2<br/>_process]
+        U3[Unit 3<br/>_process]
+        U4[...<br/>200 юнитов]
+        
+        U1 -->|виртуальный вызов| P1[Обработка]
+        U2 -->|виртуальный вызов| P2[Обработка]
+        U3 -->|виртуальный вызов| P3[Обработка]
+        U4 -->|200 вызовов| P4[...]
+    end
+    
+    subgraph "ECS (Новый подход)"
+        S[MovementSystem]
+        E1[Entity 1]
+        E2[Entity 2]
+        E3[Entity 3]
+        E4[... 200 entities]
+        
+        S -->|1 вызов| Batch[Пакетная обработка]
+        Batch -->|обрабатывает| E1
+        Batch -->|обрабатывает| E2
+        Batch -->|обрабатывает| E3
+        Batch -->|обрабатывает| E4
+    end
+    
+    style P4 fill:#ff9999
+    style Batch fill:#99ff99
+```
+
+---
+
 ## 1. Общая архитектура системы
 
 ```mermaid

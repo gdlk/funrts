@@ -174,14 +174,14 @@ func setup_systems() -> void:
 	add_system(ECSProductionSystem.new())
 
 ## Добавляет систему в мир
-func add_system(system: System) -> void:
+func add_system(system: Node) -> void:
 	systems.append(system)
 	add_child(system)
 	stats.system_count = systems.size()
 	print("[ECSWorld] Added system: %s" % system)
 
 ## Удаляет систему из мира
-func remove_system(system: System) -> void:
+func remove_system(system: Node) -> void:
 	var index = systems.find(system)
 	if index >= 0:
 		systems.remove_at(index)

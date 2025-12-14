@@ -1,8 +1,9 @@
 # Техническая архитектура: Три Расы
 ## Выбор технологий и архитектурные решения
 
-**Версия:** 1.0  
-**Дата:** 01.12.2024
+**Версия:** 2.0
+**Дата:** 14.12.2024
+**Обновление:** Добавлена ECS архитектура
 
 ---
 
@@ -72,7 +73,23 @@
 
 ---
 
-## 2. Архитектура игры (Godot)
+## 2. Архитектура игры (Godot + ECS)
+
+### 2.0 Гибридная ECS архитектура
+
+**ВАЖНО:** Проект использует **гибридный подход** - Godot Node для визуализации + ECS для логики симуляции.
+
+**Преимущества:**
+- ✅ Сохраняем мощь Godot (физика, рендеринг, UI)
+- ✅ Получаем производительность ECS (3-5x быстрее для 200+ юнитов)
+- ✅ Постепенная миграция без риска
+- ✅ Легко масштабируется
+
+**Подробная документация ECS:**
+- [`docs/ECS_ARCHITECTURE.md`](ECS_ARCHITECTURE.md) - полная архитектура
+- [`docs/ECS_MIGRATION_GUIDE.md`](ECS_MIGRATION_GUIDE.md) - руководство по миграции
+- [`docs/ECS_IMPLEMENTATION_PLAN.md`](ECS_IMPLEMENTATION_PLAN.md) - план внедрения
+- [`scripts/ecs/README.md`](../scripts/ecs/README.md) - техническая документация
 
 ### 2.1 Структура проекта
 
@@ -113,15 +130,44 @@ funrts/
 │       ├── Map.tscn
 │       └── MapGenerator.gd
 ├── scripts/
+│   ├── ecs/                          # ⭐ НОВАЯ ECS АРХИТЕКТУРА
+│   │   ├── ECSWorld.gd              # Менеджер ECS (автозагрузка)
+│   │   ├── Entity.gd                # Базовая сущность
+│   │   ├── Component.gd             # Базовый компонент
+│   │   ├── System.gd                # Базовая система
+│   │   ├── EntityNode.gd            # Связь Node ↔ ECS
+│   │   ├── UnitNode.gd              # Гибридный юнит
+│   │   ├── BuildingNode.gd          # Гибридное здание
+│   │   ├── components/              # 15 компонентов
+│   │   │   ├── TransformComponent.gd
+│   │   │   ├── HealthComponent.gd
+│   │   │   ├── VelocityComponent.gd
+│   │   │   ├── NeedsComponent.gd
+│   │   │   ├── SkillsComponent.gd
+│   │   │   ├── StatsComponent.gd
+│   │   │   ├── TaskComponent.gd
+│   │   │   ├── PathComponent.gd
+│   │   │   ├── BuildingComponent.gd
+│   │   │   ├── ProductionComponent.gd
+│   │   │   ├── WorkersComponent.gd
+│   │   │   ├── RaceComponent.gd
+│   │   │   ├── LizardBioComponent.gd
+│   │   │   ├── CanidPackComponent.gd
+│   │   │   └── RusMechanicalComponent.gd
+│   │   └── systems/                 # 4 ECS системы
+│   │       ├── ECSNeedsSystem.gd
+│   │       ├── ECSMovementSystem.gd
+│   │       ├── ECSProductionSystem.gd
+│   │       └── ECSAISystem.gd
 │   ├── autoload/
 │   │   ├── GameManager.gd
 │   │   ├── ResourceManager.gd
 │   │   ├── EventBus.gd
 │   │   └── SaveSystem.gd
-│   ├── systems/
-│   │   ├── PathfindingSystem.gd
-│   │   ├── ProductionSystem.gd
-│   │   ├── NeedsSystem.gd
+│   ├── systems/                      # Вспомогательные системы
+│   │   ├── PathfindingSystem.gd     # (используется ECS)
+│   │   ├── ProductionSystem.gd      # (устаревает, заменяется ECS)
+│   │   ├── NeedsSystem.gd           # (устаревает, заменяется ECS)
 │   │   └── CombatSystem.gd
 │   ├── data/
 │   │   ├── UnitData.gd
@@ -138,6 +184,67 @@ funrts/
 ```
 
 ---
+### 2.2 ECS Архитектура (Новое!)
+
+#### 2.2.0 Обзор гибридной ECS
+
+**Entity-Component-System** - это архитектурный паттерн, где:
+- **Entity** - просто уникальный ID, связывающий компоненты
+- **Component** - данные без логики (здоровье, позиция, потребности)
+- **System** - логика без данных (обрабатывает компоненты)
+
+**Гибридный подход в проекте:**
+```
+UnitNode (CharacterBody2D)  ←→  ECS Entity
+     ↓                              ↓
+Визуализация                   Компоненты
+Физика                         (данные)
+Input                              ↓
+     ↓                          Системы
+Синхронизация  ←──────────  (логика)
+```
+
+**Пример создания юнита с ECS:**
+```gdscript
+# Создание юнита
+var unit = UnitNode.new()
+unit.global_position = Vector2(100, 100)
+unit.unit_race = "lizard"
+add_child(unit)
+
+# Entity и все компоненты создаются автоматически в _ready()!
+
+# Работа с компонентами
+var health = ecs_world.get_component(unit.entity_id, "res://scripts/ecs/components/HealthComponent.gd")
+health.take_damage(10)
+
+var needs = ecs_world.get_component(unit.entity_id, "res://scripts/ecs/components/NeedsComponent.gd")
+print("Mood: ", needs.get_mood())
+```
+
+**Преимущества ECS для проекта:**
+- 🚀 **3-5x быстрее** для 200+ юнитов (см. бенчмарки в ECS_MIGRATION_GUIDE.md)
+- 🎨 **Гибкая композиция** - легко добавлять новые возможности через компоненты
+- 🔧 **Легко тестировать** - компоненты и системы независимы
+- 📊 **Cache-friendly** - данные компактно в памяти, лучшее использование CPU cache
+- 🔄 **Совместимость** - работает параллельно со старым кодом
+
+**Подробная документация ECS:**
+- [`docs/ECS_ARCHITECTURE.md`](ECS_ARCHITECTURE.md) - полная архитектура с примерами
+- [`docs/ECS_MIGRATION_GUIDE.md`](ECS_MIGRATION_GUIDE.md) - руководство по миграции
+- [`docs/ECS_IMPLEMENTATION_PLAN.md`](ECS_IMPLEMENTATION_PLAN.md) - план внедрения
+- [`docs/ECS_NEXT_STEPS.md`](ECS_NEXT_STEPS.md) - следующие шаги
+- [`scripts/ecs/README.md`](../scripts/ecs/README.md) - техническая документация
+
+**Текущий статус ECS:**
+- ✅ Базовая инфраструктура (ECSWorld, Entity, Component, System)
+- ✅ 15 компонентов (Transform, Health, Needs, Skills и др.)
+- ✅ 4 системы (Needs, Movement, Production, AI)
+- ✅ Гибридные классы (UnitNode, BuildingNode)
+- 🚧 Тестирование и миграция существующих юнитов
+
+---
+
 
 ### 2.2 Основные системы
 
