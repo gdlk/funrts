@@ -17,6 +17,7 @@ config/icon="res://icon.png"
 
 [autoload]
 
+ECSWorld="*res://scripts/ecs/ECSWorld.gd"
 GameManager="*res://scripts/autoload/GameManager.gd"
 ResourceManager="*res://scripts/autoload/ResourceManager.gd"
 EventBus="*res://scripts/autoload/EventBus.gd"
