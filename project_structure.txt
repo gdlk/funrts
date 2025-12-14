@@ -34,15 +34,44 @@ funrts/
 │       ├── Map.tscn
 │       └── MapGenerator.gd
 ├── scripts/
+│   ├── ecs/                          # ⭐ НОВАЯ ECS АРХИТЕКТУРА
+│   │   ├── ECSWorld.gd              # Менеджер ECS (автозагрузка)
+│   │   ├── Entity.gd                # Базовая сущность
+│   │   ├── Component.gd             # Базовый компонент
+│   │   ├── System.gd                # Базовая система
+│   │   ├── EntityNode.gd            # Связь Node ↔ ECS
+│   │   ├── UnitNode.gd              # Гибридный юнит
+│   │   ├── BuildingNode.gd          # Гибридное здание
+│   │   ├── components/              # 15 компонентов
+│   │   │   ├── TransformComponent.gd
+│   │   │   ├── HealthComponent.gd
+│   │   │   ├── VelocityComponent.gd
+│   │   │   ├── NeedsComponent.gd
+│   │   │   ├── SkillsComponent.gd
+│   │   │   ├── StatsComponent.gd
+│   │   │   ├── TaskComponent.gd
+│   │   │   ├── PathComponent.gd
+│   │   │   ├── BuildingComponent.gd
+│   │   │   ├── ProductionComponent.gd
+│   │   │   ├── WorkersComponent.gd
+│   │   │   ├── RaceComponent.gd
+│   │   │   ├── LizardBioComponent.gd
+│   │   │   ├── CanidPackComponent.gd
+│   │   │   └── RusMechanicalComponent.gd
+│   │   └── systems/                 # 4 ECS системы
+│   │       ├── ECSNeedsSystem.gd
+│   │       ├── ECSMovementSystem.gd
+│   │       ├── ECSProductionSystem.gd
+│   │       └── ECSAISystem.gd
 │   ├── autoload/
 │   │   ├── GameManager.gd
 │   │   ├── ResourceManager.gd
 │   │   ├── EventBus.gd
 │   │   └── SaveSystem.gd
-│   ├── systems/
-│   │   ├── PathfindingSystem.gd
-│   │   ├── ProductionSystem.gd
-│   │   ├── NeedsSystem.gd
+│   ├── systems/                      # Вспомогательные системы
+│   │   ├── PathfindingSystem.gd     # (используется ECS)
+│   │   ├── ProductionSystem.gd      # (устаревает, заменяется ECS)
+│   │   ├── NeedsSystem.gd           # (устаревает, заменяется ECS)
 │   │   └── CombatSystem.gd
 │   ├── data/
 │   │   ├── UnitData.gd
@@ -52,7 +81,7 @@ funrts/
 │       ├── Constants.gd
 │       └── Helpers.gd
 └── data/
-	├── units/
-	├── buildings/
-	├── resources/
-	└── events/
+    ├── units/
+    ├── buildings/
+    ├── resources/
+    └── events/
